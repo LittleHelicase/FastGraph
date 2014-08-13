@@ -1,7 +1,7 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Fast Graph, Graph Generator</title>
+    <title>Fast Graph, a Graph Generator</title>
     <script src="lib/jquery.js"></script>
     <script src="lib/underscore.js"></script>
     <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
@@ -45,10 +45,10 @@
         </div>
       </div>
       <div class="field">
-        <label>Nodes</label>
+        <label>Nodes (read-only)</label>
         <div class="ui fluid input">
-          <input id="nodes" disabled type="text" placeholder="All nodes: e.g. A,B,C" />
-        </div
+          <input id="nodes" readonly="readonly" type="text" placeholder="All nodes: e.g. A,B,C" />
+      </div>
       </div>
       <br/>
       <div class="two fields">
@@ -105,12 +105,13 @@
         {button:"activate-tex-view",tab:"tex"},
         {button:"activate-svg-view",tab:"svg"}
       ]
+
       function Template(name){
         var html = $("#"+name).html();
         html = html.replace(/&lt;%/g, "<%").replace(/%&gt;/g, "%>");
         return _.template(html);
       }
-      var numNodes = 0;
+
       function createGraph(){
         var makeEdge = function(edgeString){
           var parts = edgeString.split("->");
@@ -119,10 +120,11 @@
           }
           return {from: parts[0].trim(), to: parts[1].trim()};
         }
+        
         var edgeStrings = $("#edges").val().split(",");
-        var nodes = _.map(
-          $("#nodes").val().split(","),
-          function(n){return n.trim();});
+        //extracting nodes from the edgeStrings
+        var nodes = _.compact(_.flatten(_.map(edgeStrings,function(n){return n.trim().split("->")})));
+          
         if(nodes[0].trim() == "") nodes = [null];
         var edges = _.compact(
           _.map(edgeStrings, makeEdge));
@@ -131,32 +133,33 @@
           _.union(nodes,
           _.flatten(
           _.map(edges, function(edge){ return [edge.from, edge.to]})))));
-        if(numNodes != edgeNodes.length){
-          $("#nodes").val(edgeNodes.join(","));
-          numNodes = edgeNodes.length;
-        }
+          
+          edgeNodes.sort();
+        
+        $("#nodes").val(edgeNodes.join(","));
+        
         var graphSettings = {
           edgeDist:$("#edgeDist").val(),
           levelDist:$("#levelDist").val()
         };
         return {nodes: edgeNodes, connections: edges, settings: graphSettings};
       }
+
       function createTex(graph, layout){
         var templ = Template("tikzbase");
         $("#tex-code").html(templ({graph: graph, layout: layout}));
       }
-      var noUpdate = false;
+
       function update(){
-        if(noUpdate) return;
-        noUpdate = true;
         var graph = createGraph();
         var layout = createSVG(graph);
         createTex(graph, layout);
-        noUpdate = false;
       }
+
       function escapeHTML(string){
         return string.replace(/</g, "&lt;").replace(/>/g, "&gt;");
       }
+
       function createSVG(graph){
         $("#result").html("");
         $("#doWork").html("");
@@ -166,8 +169,7 @@
         $("#result").find("svg").attr("class", "dagre");
         return layout;
       }
-      $("#load").click(update);
-      $("input").change(update);
+      
       $("input[type='text']").keyup(update);
       var intervalID;
       $(".range").mousedown(function(){
@@ -176,17 +178,20 @@
       $(".range").mouseup(function(){
         clearInterval(intervalID);
       });
+
       function hideTabs(){
         _.each(tabs, function(tab){
           $("#"+tab.button).removeClass("active");
           $("#"+tab.tab).addClass("invisible");
         })
       }
+
       function showTab(tab){
         hideTabs();
         $("#"+tab.button).addClass("active");
         $("#"+tab.tab).removeClass("invisible");
       }
+
       _.each(tabs, function(tab){
         $("#"+tab.button).click(function(){
           showTab(tab);
