@@ -1,0 +1,198 @@
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Fast Graph, Graph Generator</title>
+    <script src="lib/jquery.js"></script>
+    <script src="lib/underscore.js"></script>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script src="lib/dagred3.min.js"></script>
+    <script src="lib/svg-graph.js"></script>
+    <link rel="stylesheet" type="text/css" href="style/style.css" />
+    <link rel="stylesheet" type="text/css" href="style/semantic.min.css" />
+    <link rel="stylesheet" type="text/css" href="style/dagre.css" />
+    <link href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700|Open+Sans:300italic,400,300,700" rel="stylesheet" type="text/css">
+  </head>
+  <body>
+    <div class="templates">
+      <div id="entry">
+        <div class="item">
+          <div class="content">
+            <div class="heading">{{name}}</div>
+            <pre><code>{{content}}</pre></code>
+          </div>
+        </div>
+      </div>
+      <code id="tikzbase">
+\begin{tikzpicture}[>=latex,every node/.style={circle,draw=black}]
+  \tikzstyle{node}=[circle,minimum size=0.6cm,draw=black]
+  <% layout.eachNode(function(n,data){ %>
+  \node[node] at (<%=data.x * 0.02%>,<%=data.y*-0.02%>) (<%=n%>) {<%=n%>}; <% }); %>
+  <% layout.eachEdge(function(e,u,v,data){ %>
+  \draw[->] (<%=u %>) -- (<%=v%>); <% }); %>
+\end{tikzpicture}
+      </code>
+    </div>
+    <center>
+    <h1 class="ui heading">Fast Graph</h1>
+  </center>
+      
+    <div id="content" class="ui inverted form segment">
+      <h2 class="ui heading">Inputs</h2>
+      <div class="field">
+        <label>Kanten</label>
+        <div class="ui fluid input">
+          <input id="edges" type="text" placeholder="Edges: e.g. A->B , B->C" />
+        </div>
+      </div>
+      <div class="field">
+        <label>Nodes</label>
+        <div class="ui fluid input">
+          <input id="nodes" type="text" placeholder="All nodes: e.g. A,B,C" />
+        </div
+      </div>
+      <br/>
+      <div class="two fields">
+        <div class="field">
+          <label>Level Distance</label>
+          <input class="range" id="levelDist" style="width:300px" type="range"  min="0" max="100" />
+        </div>
+        <div class="field">
+          <label>Edge Distance</label>
+          <input class="range" id="edgeDist" style="width:300px" type="range"  min="0" max="400" />
+        </div>
+      </div>
+      <div style="min-height:150px;" class="ui tabular menu inverted">
+        <a id="activate-graph-view" class="item">Graph View</a>
+        <a id="activate-tex-view" class="item">Tex + Tikz</a>
+        <a id="activate-svg-view" class="item">SVG</a>
+        <div id="result" class="ui segment tab-content invisible">
+        </div>
+        <div id="tex" class="ui segment tab-content invisible">
+          <pre><code id="tex-code">
+          </pre></code>
+        </div>
+        <div id="svg" style="overflow:hidden" class="ui segment tab-content invisible">
+          <pre><code id="svg-code">
+          </pre></code>
+        </div>
+      </div>
+      <div id="doWork" class="worker"></div>
+    </div>
+    </div>
+    <div style="position:absolute; left:0; bottom:0; right:0" class="ui inverted green page grid segment">
+      <div class="ten wide column">
+        <div class="ui ten column stackable grid">
+          <div class="five wide column">
+            <div class="ui header">Source</div>
+            <div class="ui link list">
+              <a class="item" href="https://github.com/LittleHelicase/FastGraph" class="ui header"><i class="github icon"></i>@Github</a>
+            </div>
+          </div>
+          <div class="five wide column">
+            <div class="ui header">Thanks to</div>
+            <div class="ui  link list">
+              <a class="item" href="https://github.com/cpettitt/dagre-d3">Dagre-D3</a>
+              <a class="item" href="http://semantic-ui.com/">Semantic UI</a>
+              <a class="item" href="http://underscorejs.org/">UnderscoreJS</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      var tabs = [
+        {button:"activate-graph-view",tab:"result"},
+        {button:"activate-tex-view",tab:"tex"},
+        {button:"activate-svg-view",tab:"svg"}
+      ]
+      function Template(name){
+        var html = $("#"+name).html();
+        html = html.replace(/&lt;%/g, "<%").replace(/%&gt;/g, "%>");
+        return _.template(html);
+      }
+      var numNodes = 0;
+      function createGraph(){
+        var makeEdge = function(edgeString){
+          var parts = edgeString.split("->");
+          if(parts.length != 2 || parts[0].trim() == "" || parts[1].trim() == ""){
+            return null;
+          }
+          return {from: parts[0].trim(), to: parts[1].trim()};
+        }
+        var edgeStrings = $("#edges").val().split(",");
+        var nodes = _.map(
+          $("#nodes").val().split(","), 
+          function(n){return n.trim();});
+        if(nodes[0].trim() == "") nodes = [null];
+        var edges = _.compact(
+          _.map(edgeStrings, makeEdge));
+        var edgeNodes = _.uniq(
+          _.compact(
+          _.union(nodes,
+          _.flatten(
+          _.map(edges, function(edge){ return [edge.from, edge.to]})))));
+        if(numNodes != edgeNodes.length){
+          $("#nodes").val(edgeNodes.join(","));
+          numNodes = edgeNodes.length;
+        }
+        var graphSettings = {
+          edgeDist:$("#edgeDist").val(),
+          levelDist:$("#levelDist").val()
+        };
+        return {nodes: edgeNodes, connections: edges, settings: graphSettings};
+      }
+      function createTex(graph, layout){
+        var templ = Template("tikzbase");
+        $("#tex-code").html(templ({graph: graph, layout: layout}));
+      }
+      var noUpdate = false;
+      function update(){
+        if(noUpdate) return;
+        noUpdate = true;
+        var graph = createGraph();
+        var layout = createSVG(graph);
+        createTex(graph, layout);
+        noUpdate = false;
+      }
+      function escapeHTML(string){
+        return string.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      }
+      function createSVG(graph){        
+        $("#result").html("");
+        $("#doWork").html("");
+        var layout = drawGraph(graph, "#doWork");
+        $("#result").html($("#doWork").html());
+        $("#svg-code").html(escapeHTML($("#doWork").html()));
+        $("#result").find("svg").attr("class", "dagre");
+        return layout;
+      }
+      $("#load").click(update);
+      $("input").change(update);
+      $("input[type='text']").keyup(update);
+      var intervalID;
+      $(".range").mousedown(function(){
+        intervalID = setInterval(update,10);
+      });
+      $(".range").mouseup(function(){
+        clearInterval(intervalID);
+      });
+      function hideTabs(){
+        _.each(tabs, function(tab){
+          $("#"+tab.button).removeClass("active");
+          $("#"+tab.tab).addClass("invisible");
+        })
+      }
+      function showTab(tab){
+        hideTabs();
+        $("#"+tab.button).addClass("active");
+        $("#"+tab.tab).removeClass("invisible");
+      }
+      _.each(tabs, function(tab){
+        $("#"+tab.button).click(function(){
+          showTab(tab);
+        });
+      });
+      showTab(tabs[0]);
+    </script>
+  </body>
+</html>
