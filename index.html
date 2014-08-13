@@ -35,7 +35,7 @@
     <center>
     <h1 class="ui heading">Fast Graph</h1>
   </center>
-      
+
     <div id="content" class="ui inverted form segment">
       <h2 class="ui heading">Inputs</h2>
       <div class="field">
@@ -79,7 +79,7 @@
       <div id="doWork" class="worker"></div>
     </div>
     </div>
-    <div style="position:absolute; left:0; bottom:0; right:0" class="ui inverted green page grid segment">
+    <div style="width:100%" class="ui inverted green page grid segment">
       <div class="ten wide column">
         <div class="ui ten column stackable grid">
           <div class="five wide column">
@@ -121,7 +121,7 @@
         }
         var edgeStrings = $("#edges").val().split(",");
         var nodes = _.map(
-          $("#nodes").val().split(","), 
+          $("#nodes").val().split(","),
           function(n){return n.trim();});
         if(nodes[0].trim() == "") nodes = [null];
         var edges = _.compact(
@@ -157,7 +157,7 @@
       function escapeHTML(string){
         return string.replace(/</g, "&lt;").replace(/>/g, "&gt;");
       }
-      function createSVG(graph){        
+      function createSVG(graph){
         $("#result").html("");
         $("#doWork").html("");
         var layout = drawGraph(graph, "#doWork");
