@@ -7,6 +7,7 @@
     <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
     <script src="lib/dagred3.min.js"></script>
     <script src="lib/svg-graph.js"></script>
+    <script src="lib/semantic.min.js"></script>
     <link rel="stylesheet" type="text/css" href="style/style.css" />
     <link rel="stylesheet" type="text/css" href="style/semantic.min.css" />
     <link rel="stylesheet" type="text/css" href="style/dagre.css" />
@@ -27,8 +28,10 @@
   \tikzstyle{node}=[circle,minimum size=0.6cm,draw=black]
   <% layout.eachNode(function(n,data){ %>
   \node[node] at (<%=data.x * 0.02%>,<%=data.y*-0.02%>) (<%=n%>) {<%=n%>}; <% }); %>
-  <% layout.eachEdge(function(e,u,v,data){ %>
-  \draw[->] (<%=u %>) -- (<%=v%>); <% }); %>
+  <% layout.eachEdge(function(e,u,v,data){ if(properties.straightLines || u == v){%>  
+  \draw[->] plot [smooth, tension=0.7] coordinates { (<%=u%>.<%=data.outDir%>) <% _.each(data.points, function(p){ %> 
+  (<%=p.x * 0.02%>,<%=p.y*-0.02%>) <%}); %> (<%=v%>.<%=data.inDir%>)}; <% } else  {%>
+  \draw[->] (<%=u%>) -- (<%=v%>); <% }}); %>
 \end{tikzpicture}
       </code>
     </div>
@@ -68,11 +71,19 @@
         <div id="result" class="ui segment tab-content invisible">
         </div>
         <div id="tex" class="ui segment tab-content invisible">
+          <div class="ui button copy blue tiny" id="copy-tex">Copy to clipboard</div>
+            <div class="inline field">
+              <div class="ui checkbox">
+                <input type="checkbox" id="straight">
+                <label style="color:black">Straight Lines <small>(experimental)</small></label>
+              </div>
+            </div>
           <pre><code id="tex-code">
           </pre></code>
         </div>
         <div id="svg" style="overflow:hidden" class="ui segment tab-content invisible">
-          <pre><code id="svg-code">
+          <div class="ui button copy blue tiny" id="copy-svg">Copy to clipboard</div>
+          <pre style="margin-top:30px"><code id="svg-code">
           </pre></code>
         </div>
       </div>
@@ -104,6 +115,10 @@
         {button:"activate-graph-view",tab:"result"},
         {button:"activate-tex-view",tab:"tex"},
         {button:"activate-svg-view",tab:"svg"}
+      ];
+      var clipboards = [
+        {button:"copy-tex", content:"tex-code"},
+        {button:"copy-svg", content:"svg-code"}
       ]
 
       function Template(name){
@@ -144,10 +159,46 @@
         };
         return {nodes: edgeNodes, connections: edges, settings: graphSettings};
       }
-
+      function latexDir(p1, p2){
+        if(p1.x-p2.x < 0 && p1.y - p2.y < 0)
+          return "south east";
+        if(p1.x-p2.x > 0 && p1.y - p2.y < 0)
+          return "south west";
+        if(p1.x-p2.x < 0 && p1.y - p2.y > 0)
+          return "north east";
+        if(p1.x-p2.x > 0 && p1.y - p2.y > 0)
+          return "north west";
+        if(p1.x-p2.x == 0 && p1.y-p2.y > 0)
+          return "north";
+        if(p1.x-p2.x == 0 && p1.y-p2.y < 0)
+          return "south";
+        if(p1.x-p2.x < 0 && p1.y-p2.y == 0)
+          return "east";
+        if(p1.x-p2.x > 0 && p1.y-p2.y == 0)
+          return "west";
+        return "???";
+      }
       function createTex(graph, layout){
         var templ = Template("tikzbase");
-        $("#tex-code").html(templ({graph: graph, layout: layout}));
+        var nodes = {};
+        layout.eachNode(function(n,data){
+          nodes[n] = data;
+        });
+        layout.eachEdge(function(e,u,v,data){
+          var node = nodes[u];
+          data.outDir = latexDir(node, data.points[0]);
+          if(u == v) {
+            data.inDir = latexDir(node, data.points[data.points.length-1]);
+          } else {
+            data.inDir = latexDir(data.points[data.points.length-1], node);
+          }
+        })
+        $("#tex-code").html(templ({
+          layout: layout,
+          properties: {
+            straightLines: $("#straight")[0].checked
+          }
+        }));
       }
 
       function update(){
@@ -169,7 +220,7 @@
         $("#result").find("svg").attr("class", "dagre");
         return layout;
       }
-      
+      $("input").change(update);
       $("input[type='text']").keyup(update);
       var intervalID;
       $(".range").mousedown(function(){
@@ -185,7 +236,6 @@
           $("#"+tab.tab).addClass("invisible");
         })
       }
-
       function showTab(tab){
         hideTabs();
         $("#"+tab.button).addClass("active");
@@ -197,7 +247,10 @@
           showTab(tab);
         });
       });
+      $(".ui.checkbox").checkbox();
       showTab(tabs[0]);
     </script>
+    <script src="lib/zeroclipboard.js"></script>
+    <script src="lib/clipboard.js"></script>
   </body>
 </html>
