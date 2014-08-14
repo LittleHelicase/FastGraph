@@ -21,15 +21,40 @@
         </i>
       </div>
       <code id="tikzbase">
+\usetikzlibrary{decorations.markings}
+\tikzset{
+  set arrow inside/.code={\pgfqkeys{/tikz/arrow inside}{#1}},
+  set arrow inside={end/.initial=>, opt/.initial=},
+  /pgf/decoration/Mark/.style={
+    mark/.expanded=at position #1 with
+    {
+      \noexpand\arrow[\pgfkeysvalueof{/tikz/arrow inside/opt}]{\pgfkeysvalueof{/tikz/arrow inside/end}}
+    }
+  },
+  arrow inside/.style 2 args={
+    set arrow inside={#1},
+    postaction={
+      decorate,decoration={
+        markings,Mark/.list={#2}
+      }
+    }
+  },
+}
 \begin{tikzpicture}[>=latex,every node/.style={circle,draw=black}]
   \tikzstyle{node}=[circle,minimum size=0.6cm,draw=black]
   <% layout.eachNode(function(n,data){ %>
   \node[node] at (<%=data.x * 0.02%>,<%=data.y*-0.02%>) (<%=n%>) {<%=n%>}; <% }); %>
   <% layout.eachEdge(function(e,u,v,data){ if(properties.straightLines || u == v){%>  
-  \draw[->] plot [smooth, tension=0.7] coordinates { (<%=u%>.<%=data.outDir%>) <% _.each(data.points, function(p){ %> 
-  (<%=p.x * 0.02%>,<%=p.y*-0.02%>) <%}); %> (<%=v%>.<%=data.inDir%>)}; <% } else  {%>
+  \draw plot [smooth, tension=0.8] coordinates { (<%=u%>.<%=data.outDir%>) <% _.each(data.points, function(p){ %> 
+  (<%=p.x * 0.02%>,<%=p.y*-0.02%>) <%}); %> (<%=v%>.<%=data.inDir%>)} [arrow inside={}{0.999}]; <% } else  {%>
   \draw[->] (<%=u%>) -- (<%=v%>); <% }}); %>
 \end{tikzpicture}
+<!-- it is probably somehow possible to use the b-spline points of D3, but I didn't succeed...
+<% layout.eachEdge(function(e,u,v,data){ if(properties.straightLines || u == v){%>
+\draw[->] (<%=u%>.<%=data.outDir%>) .. controls (<%=u%>.<%=data.outDir%>) and (<%=(data.points[0].dl-data.points[0].x)*0.02%>,<%=(data.points[0].ul-data.points[0].x)*-0.02%>) .. (<%=data.points[0].x*0.02%>,<%=data.points[0].y*-0.02%>);
+\draw[->] (<%=data.points[2].x*0.02%>,<%=data.points[2].y*-0.02%>) .. controls (<%=data.points[2].dr*0.02%>,<%=data.points[2].ur*-0.02%>)  and (<%=v%>.<%=data.inDir%>) ..  (<%=v%>.<%=data.inDir%>);
+<% }}); %>
+-->
       </code>
     </div>
     <center>
@@ -40,8 +65,9 @@
       <h2 class="ui heading">Inputs</h2>
       <div class="field">
         <label>Edges</label>
-        <div class="ui fluid input">
+        <div class="ui fluid action input">
           <input id="edges" type="text" placeholder="Edges: e.g. A->B , B->C" />
+          <div class="ui teal right labeled icon button" id="graph-code"><i class="copy icon"></i> Copy</div>
         </div>
       </div>
       <div class="field">
@@ -71,7 +97,7 @@
             <div class="inline field">
               <div class="ui checkbox">
                 <input type="checkbox" id="straight">
-                <label style="color:black">Straight Lines <small>(experimental)</small></label>
+                <label style="color:black">Curved Lines <small>(experimental)</small></label>
               </div>
             </div>
           <pre><code id="tex-code">
@@ -121,7 +147,10 @@
       ];
       var clipboards = [
         {button:"copy-tex", content:"tex-code"},
-        {button:"copy-svg", content:"svg-code"}
+        {button:"copy-svg", content:"svg-code"},
+        {button:"graph-code", content:function(){
+          return location.href;
+        }}
       ]
 
       function Template(name){
@@ -191,6 +220,9 @@
         });
         layout.eachEdge(function(e,u,v,data){
           var node = nodes[u];
+          console.log(data.points[0]);
+          console.log(data.points[1]);
+          console.log(data.points[data.points.length-1]);
           data.outDir = latexDir(node, data.points[0]);
           if(u == v) {
             data.inDir = latexDir(node, data.points[data.points.length-1]);
@@ -210,6 +242,7 @@
         var graph = createGraph();
         var layout = createSVG(graph);
         createTex(graph, layout);
+        location.hash = "#" + $("#edges").val();
       }
 
       function escapeHTML(string){
@@ -254,6 +287,14 @@
       });
       $(".ui.checkbox").checkbox();
       showTab(tabs[0]);
+      window.onhashchange = function(){
+        $("#edges").val(location.hash.slice(1));
+        update();
+      }
+      $(function(){
+        $("#edges").val(location.hash.slice(1));
+        update();
+      });
     </script>
     <script src="lib/zeroclipboard.js"></script>
     <script src="lib/clipboard.js"></script>
