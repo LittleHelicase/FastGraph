@@ -21,6 +21,7 @@
         </i>
       </div>
       <code id="tikzbase">
+% URL to Fastgraph: <%= location.href %>
 \usetikzlibrary{decorations.markings}
 \tikzset{
   set arrow inside/.code={\pgfqkeys{/tikz/arrow inside}{#1}},
@@ -222,9 +223,6 @@
         });
         layout.eachEdge(function(e,u,v,data){
           var node = nodes[u];
-          console.log(data.points[0]);
-          console.log(data.points[1]);
-          console.log(data.points[data.points.length-1]);
           data.outDir = latexDir(node, data.points[0]);
           if(u == v) {
             data.inDir = latexDir(node, data.points[data.points.length-1]);
@@ -244,7 +242,7 @@
         var graph = createGraph();
         var layout = createSVG(graph);
         createTex(graph, layout);
-        location.hash = "#" + $("#edges").val();
+        location.hash = "#" + encodeURI($("#edges").val());
       }
 
       function escapeHTML(string){
@@ -256,7 +254,7 @@
         $("#doWork").html("");
         var layout = drawGraph(graph, "#doWork");
         $("#result").html($("#doWork").html());
-        $("#svg-code").html(escapeHTML($("#doWork").html()));
+        $("#svg-code").html("&lt;!-- URL to Fastgraph: " + location.href + " --&gt;<br/>"+escapeHTML($("#doWork").html()));
         $("#result").find("svg").attr("class", "dagre");
         return layout;
       }
@@ -290,11 +288,11 @@
       $(".ui.checkbox").checkbox();
       showTab(tabs[0]);
       window.onhashchange = function(){
-        $("#edges").val(location.hash.slice(1));
+        $("#edges").val(decodeURI(location.hash.slice(1)));
         update();
       }
       $(function(){
-        $("#edges").val(location.hash.slice(1));
+        $("#edges").val(decodeURI(location.hash.slice(1)));
         update();
       });
     </script>
