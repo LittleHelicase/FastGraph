@@ -175,7 +175,7 @@
         //extracting nodes from the edgeStrings
         var nodes = _.compact(_.flatten(_.map(edgeStrings,function(n){return n.trim().split("->")})));
 
-        if(nodes[0].trim() == "") nodes = [null];
+        if(nodes[0] == null || nodes[0].trim() == "") nodes = [null];
         var edges = _.compact(
           _.map(edgeStrings, makeEdge));
         var edgeNodes = _.uniq(
@@ -196,6 +196,7 @@
         };
         return {nodes: edgeNodes, connections: edges, settings: graphSettings};
       }
+      
       function latexDir(p1, p2){
         if(p1.x-p2.x < 0 && p1.y - p2.y < 0)
           return "south east";
@@ -215,6 +216,7 @@
           return "west";
         return "???";
       }
+      
       function createTex(graph, layout){
         var templ = Template("tikzbase");
         var nodes = {};
@@ -250,14 +252,18 @@
       }
 
       function createSVG(graph){
+        //THE ACTUAL CREATING
         $("#result").html("");
         $("#doWork").html("");
         var layout = drawGraph(graph, "#doWork");
         $("#result").html($("#doWork").html());
+        
+        //CREATE COPYABLE SVG CODE
         $("#svg-code").html("&lt;!-- URL to Fastgraph: " + location.href + " --&gt;<br/>"+escapeHTML($("#doWork").html()));
         $("#result").find("svg").attr("class", "dagre");
         return layout;
       }
+      
       $("input").change(update);
       $("input[type='text']").keyup(update);
       var intervalID;
@@ -274,6 +280,7 @@
           $("#"+tab.tab).addClass("invisible");
         })
       }
+      
       function showTab(tab){
         hideTabs();
         $("#"+tab.button).addClass("active");
