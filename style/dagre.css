@@ -1,18 +1,17 @@
 .dagre {
-  width: 40vw; height:30vw;overflow:auto; z-index:100;
+  overflow:scroll;
+  z-index:100;
 }
 .node rect {
-    stroke: #333;
-    stroke-width: 1.5px;
-    fill: #fff;
+  stroke: #333;
+
 }
 
 .edgeLabel rect {
-    fill: #fff;
+  fill: #fff;
 }
 
 .edgePath {
-    stroke: #333;
-    stroke-width: 1.5px;
-    fill: none;
+  stroke: #333;
+  fill: none;
 }
