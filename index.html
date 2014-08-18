@@ -21,6 +21,7 @@
         </i>
       </div>
       <code id="tikzbase">
+% URL to Fastgraph: <%= location.href %>
 \usetikzlibrary{decorations.markings}
 \tikzset{
   set arrow inside/.code={\pgfqkeys{/tikz/arrow inside}{#1}},
@@ -44,8 +45,8 @@
   \tikzstyle{node}=[circle,minimum size=0.6cm,draw=black]
   <% layout.eachNode(function(n,data){ %>
   \node[node] at (<%=data.x * 0.02%>,<%=data.y*-0.02%>) (<%=n%>) {<%=n%>}; <% }); %>
-  <% layout.eachEdge(function(e,u,v,data){ if(properties.straightLines || u == v){%>  
-  \draw plot [smooth, tension=0.8] coordinates { (<%=u%>.<%=data.outDir%>) <% _.each(data.points, function(p){ %> 
+  <% layout.eachEdge(function(e,u,v,data){ if(properties.straightLines || u == v){%>
+  \draw plot [smooth, tension=0.8] coordinates { (<%=u%>.<%=data.outDir%>) <% _.each(data.points, function(p){ %>
   (<%=p.x * 0.02%>,<%=p.y*-0.02%>) <%}); %> (<%=v%>.<%=data.inDir%>)} [arrow inside={}{0.999}]; <% } else  {%>
   \draw[->] (<%=u%>) -- (<%=v%>); <% }}); %>
 \end{tikzpicture}
@@ -57,9 +58,10 @@
 -->
       </code>
     </div>
+  <div id="container">
     <center>
     <h1 class="ui heading">Fast Graph</h1>
-  </center>
+    </center>
 
     <div id="content" class="ui inverted form segment">
       <h2 class="ui heading">Inputs</h2>
@@ -112,33 +114,34 @@
       <div id="doWork" class="worker"></div>
     </div>
     </div>
-    <div style="width:100%" class="ui inverted green page grid segment">
-      <div class="ten wide column">
-        <div class="ui ten column stackable grid">
-          <div class="five wide column">
-            <div class="ui header">Source</div>
-            <div class="ui link list">
-              <a class="item" href="https://github.com/LittleHelicase/FastGraph" class="ui header">@Github<i class="github icon"></i></a>
-            </div>
+  </div>
+  <div style="width:100%" class="ui inverted green page grid segment">
+    <div class="ten wide column">
+      <div class="ui ten column stackable grid">
+        <div class="five wide column">
+          <div class="ui header">Source</div>
+          <div class="ui link list">
+            <a class="item" href="https://github.com/LittleHelicase/FastGraph" class="ui header">@Github<i class="github icon"></i></a>
           </div>
-          <div class="five wide column">
-            <div class="ui header">Thanks to</div>
-            <div class="ui  link list">
-              <a class="item" href="https://github.com/cpettitt/dagre-d3">Dagre-D3</a>
-              <a class="item" href="http://semantic-ui.com/">Semantic UI</a>
-              <a class="item" href="http://underscorejs.org/">UnderscoreJS</a>
-            </div>
+        </div>
+        <div class="five wide column">
+          <div class="ui header">Thanks to</div>
+          <div class="ui  link list">
+            <a class="item" href="https://github.com/cpettitt/dagre-d3">Dagre-D3</a>
+            <a class="item" href="http://semantic-ui.com/">Semantic UI</a>
+            <a class="item" href="http://underscorejs.org/">UnderscoreJS</a>
           </div>
-          <div class="five wide column">
-            <div class="ui header">&nbsp;</div>
-            <div class="ui  link list">
-              <a class="item" href="http://d3js.org/">D3</a>
-              <a class="item" href="http://jquery.com/">JQuery</a>
-            </div>
+        </div>
+        <div class="five wide column">
+          <div class="ui header">&nbsp;</div>
+          <div class="ui  link list">
+            <a class="item" href="http://d3js.org/">D3</a>
+            <a class="item" href="http://jquery.com/">JQuery</a>
           </div>
         </div>
       </div>
     </div>
+  </div>
     <script>
       var tabs = [
         {button:"activate-graph-view",tab:"result"},
@@ -167,11 +170,11 @@
           }
           return {from: parts[0].trim(), to: parts[1].trim()};
         }
-        
+
         var edgeStrings = $("#edges").val().split(",");
         //extracting nodes from the edgeStrings
         var nodes = _.compact(_.flatten(_.map(edgeStrings,function(n){return n.trim().split("->")})));
-          
+
         if(nodes[0].trim() == "") nodes = [null];
         var edges = _.compact(
           _.map(edgeStrings, makeEdge));
@@ -180,13 +183,13 @@
           _.union(nodes,
           _.flatten(
           _.map(edges, function(edge){ return [edge.from, edge.to]})))));
-          
+
           edgeNodes.sort();
-        
+
         $("#nodes").html(_.reduce(edgeNodes, function(rest,n){
           return rest + Template("labels")({node:n});
         }, ""));
-        
+
         var graphSettings = {
           edgeDist:$("#edgeDist").val(),
           levelDist:$("#levelDist").val()
@@ -220,9 +223,6 @@
         });
         layout.eachEdge(function(e,u,v,data){
           var node = nodes[u];
-          console.log(data.points[0]);
-          console.log(data.points[1]);
-          console.log(data.points[data.points.length-1]);
           data.outDir = latexDir(node, data.points[0]);
           if(u == v) {
             data.inDir = latexDir(node, data.points[data.points.length-1]);
@@ -242,7 +242,7 @@
         var graph = createGraph();
         var layout = createSVG(graph);
         createTex(graph, layout);
-        location.hash = "#" + $("#edges").val();
+        location.hash = "#" + encodeURI($("#edges").val());
       }
 
       function escapeHTML(string){
@@ -254,7 +254,7 @@
         $("#doWork").html("");
         var layout = drawGraph(graph, "#doWork");
         $("#result").html($("#doWork").html());
-        $("#svg-code").html(escapeHTML($("#doWork").html()));
+        $("#svg-code").html("&lt;!-- URL to Fastgraph: " + location.href + " --&gt;<br/>"+escapeHTML($("#doWork").html()));
         $("#result").find("svg").attr("class", "dagre");
         return layout;
       }
@@ -288,11 +288,11 @@
       $(".ui.checkbox").checkbox();
       showTab(tabs[0]);
       window.onhashchange = function(){
-        $("#edges").val(location.hash.slice(1));
+        $("#edges").val(decodeURI(location.hash.slice(1)));
         update();
       }
       $(function(){
-        $("#edges").val(location.hash.slice(1));
+        $("#edges").val(decodeURI(location.hash.slice(1)));
         update();
       });
     </script>
