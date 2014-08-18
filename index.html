@@ -88,6 +88,34 @@
           <input class="range" id="edgeDist" style="width:300px" type="range"  min="0" max="400" />
         </div>
       </div>
+      <div class="two fields">
+        <div class="field">
+          <label>Directed?</label>
+          <div class="ui checkbox">
+            <input type="checkbox" id="directed">
+            <label>Directed Graph</label>
+          </div>
+        </div>
+        <div class="field">
+          <label>Layout Direction</label>
+          <div class="ui form">
+            <div class="grouped fields">
+              <div class="field">
+                <div class="ui radio checkbox">
+                  <input id="topDown" type="radio" name="layoutDir" checked>
+                  <label for="topDown">Top Down</label>
+                </div>
+              </div>
+              <div class="field">
+                <div class="ui radio checkbox">
+                  <input id="leftRight" type="radio" name="layoutDir">
+                  <label for="leftRight">Left Right</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
       <div style="min-height:150px;" class="ui tabular menu inverted">
         <a id="activate-graph-view" class="item">Graph View</a>
         <a id="activate-tex-view" class="item">Tex + Tikz</a>
@@ -255,7 +283,11 @@
         //THE ACTUAL CREATING
         $("#result").html("");
         $("#doWork").html("");
-        var layout = drawGraph(graph, "#doWork");
+        var layout = drawGraph(graph, "#doWork", 
+          {
+            directed: $("#directed")[0].checked,
+            layoutDir: ($("#topDown")[0].checked) ? "TB" : "LR"
+          });
         $("#result").html($("#doWork").html());
         
         //CREATE COPYABLE SVG CODE
@@ -293,6 +325,7 @@
         });
       });
       $(".ui.checkbox").checkbox();
+      $('.ui.radio.checkbox').checkbox();
       showTab(tabs[0]);
       window.onhashchange = function(){
         $("#edges").val(decodeURI(location.hash.slice(1)));
