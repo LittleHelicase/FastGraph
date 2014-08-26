@@ -1,0 +1,24 @@
+script(src="templates/templates.js")
+script(src="scripts/parse-graph.js")
+script(src="scripts/svg-graph.js")
+script(src="scripts/tex-graph.js")
+script(src="scripts/parse-graph.js")
+script.
+  var clipboards = [
+      {button:"copy-tex", content:"tex-code"},
+      {button:"copy-svg", content:"svg-code"},
+      {button:"graph-code", content:function(){
+        return location.href;
+      }}
+    ]
+    
+  function update(){
+    var graph = createGraph();
+    var layout = createSVG(graph);
+    createTex(graph, layout);
+    location.hash = "#" + encodeURI($("#edges").val());
+  }
+script(src="scripts/footer.js")
+script(src="scripts/controls.js")
+script(src="lib/zeroclipboard.js")
+script(src="lib/clipboard.js")

@@ -1,2 +1,5 @@
 #my local example of
 tcp-state-diagram.html
+
+node_modules*
+.c9*

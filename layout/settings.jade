@@ -1,0 +1,30 @@
+.ui.fluid.basic.accordion
+  .title.inverted 
+    i.icon.dropdown
+    | Settings
+  .content.inverted
+    .two.fields
+      .field
+        label Level Distance
+        input(type="range",min="1",max="100").range#levelDist
+      .field
+        label Edge Distance
+        input(type="range",min="60",max="160").range#edgeDist
+    .two.fields
+      .field
+        label Directed?
+        .ui.checkbox
+          input(type="checkbox")#directed
+          label Directed Graph
+      .field
+        label Layout Direction
+        .ui.form
+          .grouped.fields
+            .field
+              .ui.radio.checkbox
+                input(type="radio",name="layoutDir",checked)#topDown
+                label(for="topDown") Top Down
+            .field
+              .ui.radio.checkbox
+                input(type="radio",name="layoutDir",checked)#leftRight
+                label(for="leftRight") Left Right

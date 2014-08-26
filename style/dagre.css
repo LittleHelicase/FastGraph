@@ -1,6 +1,14 @@
 .dagre {
+<<<<<<< HEAD
   overflow:auto;
   z-index:100;
+=======
+  height:30vw;
+  overflow:auto;
+  z-index:100;
+  background-color: white!important;
+  width:100%;
+>>>>>>> restructured
 }
 .node rect {
   stroke: #333;
@@ -14,4 +22,8 @@
 .edgePath {
   stroke: #333;
   fill: none;
+}
+
+tspan {
+    color:black!important;
 }
