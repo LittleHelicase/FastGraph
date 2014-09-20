@@ -1,4 +1,6 @@
 script(src="templates/templates.js")
+script(src="scripts/dagre-graph.js")
+script(src="scripts/jointjs-graph.js")
 script(src="scripts/parse-graph.js")
 script(src="scripts/svg-graph.js")
 script(src="scripts/tex-graph.js")
@@ -13,10 +15,12 @@ script.
     ]
     
   function update(){
-    var graph = createGraph();
+    var description = getInputs();
+    var graph = createGraph(description);
     var layout = createSVG(graph);
+    var sourceMap = createSourceMap(description);
     createTex(graph, layout);
-    location.hash = "#" + encodeURI($("#edges").val());
+    updateFields(graph);
   }
 script(src="scripts/footer.js")
 script(src="scripts/controls.js")

@@ -19,6 +19,8 @@ function latexDir(p1, p2){
 }
 
 function createTex(graph, layout){
+  // no visual yet
+  return;
   var templ = Template("tikzbase");
   var nodes = {};
   layout.eachNode(function(n,data){

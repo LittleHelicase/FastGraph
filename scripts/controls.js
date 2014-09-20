@@ -20,4 +20,21 @@ $(function(){
 });
 
 $(".accordion").accordion();
-      $('.tabular.menu .item').tab({history:false});
+$('.tabular.menu .item').tab({history:false});
+
+function getInputs(){
+  return {
+    edgeString:    $("#edges").val(),
+    edgeDistance:  $("#edgeDist").val(),
+    levelDistance: $("#levelDist").val(),
+    directed: $("#directed")[0].checked,
+    layoutDir: ($("#topDown")[0].checked) ? "TB" : "LR"
+  }
+}
+
+function updateFields(graph){
+  $("#nodes").html(_.reduce(graph.nodes, function(rest,n){
+    return rest + Template("labels")({node:n});
+  }, ""));
+  location.hash = "#" + encodeURI($("#edges").val());
+}

@@ -3,6 +3,10 @@ html
   include layout/header.jade
   body
     include templates/base.jade
-    include layout/ui.jade
-    include layout/footer.jade
+    #result.fullscreen
+    .worker#doWork.fullscreen
+    include layout/input.jade
+    include layout/settings-pane.jade
+    div(style="display:none")
+      include layout/settings.jade
     include scripts.jade

@@ -1,6 +1,11 @@
 
 function drawGraph(graph, selector){
-  var g = new dagreD3.Digraph();
+  var g;
+  if(graph.settings.directed){
+    g = new dagreD3.Digraph();
+  } else {
+    g = new dagreD3.Graph();
+  }
 
   for(var i=0; i<graph.nodes.length; i++){
     g.addNode(graph.nodes[i], {label: graph.nodes[i]});
@@ -9,7 +14,9 @@ function drawGraph(graph, selector){
   for(var i=0; i<graph.connections.length; i++){
     var from = graph.connections[i].from;
     var to = graph.connections[i].to;
-    g.addEdge(null, from, to);
+    if(!g.hasEdge(from + "->" + to)){
+      g.addEdge(from + "->" + to, from, to);
+    }
   }
 
   var svg = d3.select(selector).append("svg");
@@ -17,8 +24,8 @@ function drawGraph(graph, selector){
   var svgGroup = svg.append("g")
   var renderer = new dagreD3.Renderer();
   var layout = dagreD3.layout()
-                      .rankSep(graph.settings.levelDist)
-                      .edgeSep(graph.settings.edgeDist);
+                      .rankSep(graph.settings.levelDistance)
+                      .edgeSep(graph.settings.edgeDistance);
                       
   var initialScale = 1.75;
   var oldZoom = renderer.zoom();
