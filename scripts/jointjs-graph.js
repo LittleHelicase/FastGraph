@@ -1,6 +1,7 @@
 
 // Thanks to David Durman
 // http://www.daviddurman.com/automatic-graph-layout-with-jointjs-and-dagre.html
+// self loops are missing.. https://gist.github.com/DavidDurman/d4250dd3abe5efc9a1af
 
 function makeLink(parentElementLabel, childElementLabel) {
 
@@ -49,11 +50,16 @@ function layoutGraph(graphData, selector){
       model: graph
   });
   
+  var edgeMapping = {};
+  var toString = function(edge) { return edge.from + "->" + edge.to };
+  
   var elements = _.map(graphData.nodes, function(node) {
     return makeElement(node);
   });
   var links = _.map(graphData.connections, function(edge) {
-      return makeLink(edge.from, edge.to);
+    var link = makeLink(edge.from, edge.to);;
+    edgeMapping[toString(edge)] = link;
+    return link
   });
   
   graph.resetCells(_.union(elements, links));
@@ -64,4 +70,16 @@ function layoutGraph(graphData, selector){
   V(paper.viewport).scale(2);
   V(paper.viewport).translate($("body").width()/2, $("body").height()/2);
   console.log(layout);
+  console.log(graph);
+  
+  return {
+    getNodeElement: function(node){
+      console.log(graph.getCell(node));
+      return $("g[model-id='"+node+"']");
+    },
+    getEdgeElement: function(edge){
+      var link = edgeMapping[toString(edge)];
+      return $("g[model-id='"+link.id+"']");
+    }
+  }
 }

@@ -34,14 +34,14 @@ function createSourceMap(description){
       if(edgeObj != null){
         last.push(
           {
-            startPosition:l.endPosition,
+            startPosition:l.endPosition+1,
             endPosition:l.endPosition + edge.length+1,
             edge: edgeObj,
             edgeString: edge
           });
       }
       return last;
-    },[{startPosition: 0, endPosition:0}])
+    },[{startPosition: 0, endPosition:-1}])
     .rest()
     .value();
     

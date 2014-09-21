@@ -5,6 +5,7 @@ script(src="scripts/parse-graph.js")
 script(src="scripts/svg-graph.js")
 script(src="scripts/tex-graph.js")
 script(src="scripts/parse-graph.js")
+script(src="scripts/listeners.js")
 script.
   var clipboards = [
       {button:"copy-tex", content:"tex-code"},
@@ -19,6 +20,7 @@ script.
     var graph = createGraph(description);
     var layout = createSVG(graph);
     var sourceMap = createSourceMap(description);
+    installListeners(graph, layout, sourceMap);
     createTex(graph, layout);
     updateFields(graph);
   }
