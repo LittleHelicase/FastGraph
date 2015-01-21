@@ -1,0 +1,79 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link href="../bower_components/core-animated-pages/core-animated-pages.html" rel="import">
+<link href="../bower_components/core-animated-pages/transitions/cross-fade.html" rel="import">
+<link href="../bower_components/core-animated-pages/transitions/hero-transition.html" rel="import">
+
+<polymer-element name="fastgraph-banner">
+  
+  <template>
+  <style>
+  #bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: orange;
+  }
+  #title_banner {
+    position:absolute;
+    font-size: 300%;
+    top:25vh;
+    left:20vw;
+    width:30vw;
+    height:20vw;
+    background-image:url("../resources/logo.png");
+    background-size: 30vw;
+    background-position: right bottom;
+    padding-right:120px;
+    padding-bottom:40px;
+    background-repeat: no-repeat;
+  }
+  #title_main {
+    position:absolute;
+    font-size: 70%;
+    right:10%;
+    top:5%;
+    color:darkgray;
+    width:6vw;
+    height:4vw;
+    background-image: url("../resources/logo.png");
+    background-size: 6vw;
+    background-position: right bottom;
+    padding-right:30px;
+    padding-bottom:10px;
+    background-repeat: no-repeat;
+  }
+  
+  </style>
+    <core-animated-pages id="cap" transitions="hero-transition cross-fade">
+      <section id="page1">
+        <div id="bg" cross-fade></div>
+        <div flex hero-id="title" id="title_banner" hero>
+        </div>
+      </section>
+      <section id="page2">
+        <div flex hero-id="title" id="title_main" hero>
+        </div>
+      </section>
+      <section id="page2">
+        <div flex hero-id="title" id="title_main">
+        </div>
+        <content cross-fade></content>
+      </section>
+    </core-animated-pages>
+  </template>
+  
+  <script>
+  Polymer({
+    ready: function(){
+      this.async(function(){
+        this.$.cap.selected=1;
+      },null,2000);
+      this.async(function(){
+        this.$.cap.selected=2;
+      },null,3000);
+    }
+  });
+  </script>
+</polymer-element>

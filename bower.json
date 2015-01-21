@@ -1,0 +1,29 @@
+{
+  "name": "FastGraph",
+  "version": "0.1.0",
+  "homepage": "http://littlehelicase.github.io/FastGraph/index.html",
+  "authors": [
+    "Maximilian Klein <dasmaxl@gmail.com>"
+  ],
+  "description": "Simple utility to create Graphs",
+  "main": "index.html",
+  "keywords": [
+    "Graph",
+    "Layout"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "dagre": "~0.7.1",
+    "lodash": "~2.4.1",
+    "polymer": "Polymer/polymer#~0.5.2",
+    "core-animated-pages": "Polymer/core-animated-pages#~0.5.2"
+  }
+}
